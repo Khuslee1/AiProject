@@ -14,6 +14,15 @@ export const ImageAnalysis = () => {
   const ingredientRef = useRef<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [result, setResult] = useState<string | null>(null);
+  const processIngredients = (text: string): string => {
+    const rawIngredients = text.split(",") ?? [];
+
+    const uniqueIngredients: string[] = [
+      ...new Set(rawIngredients.map((item) => item.trim()).filter(Boolean)),
+    ];
+
+    return uniqueIngredients.join(", ");
+  };
 
   const HandleGenerate = async () => {
     setLoading(true);
@@ -22,48 +31,40 @@ export const ImageAnalysis = () => {
       if (!captionref.current) {
         captionref.current = await pipeline(
           "image-classification",
-          // "Xenova/vit-gpt2-image-captioning",
           "Xenova/vit-base-patch16-224",
-          { device: "webgpu" },
         );
       }
 
-      const captionOutput = await captionref.current(preview);
+      const captionOutput: { label: string; score: number }[] =
+        await captionref.current(preview);
 
       console.log(captionOutput, "captionOutput");
 
-      const caption = Array.isArray(captionOutput)
-        ? captionOutput.filter((ele) => ele.score > 0.5)?.push()
-        : (captionOutput as { generated_text: string })?.generated_text;
+      const caption = captionOutput
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 2);
 
       if (!ingredientRef.current) {
         ingredientRef.current = await pipeline(
-          "text-generation",
-          "HuggingFaceTB/SmolLM2-135M-Instruct",
+          "text2text-generation",
+          "Xenova/flan-t5-base",
         );
       }
 
       const ingredientPrompt = `
-      Extract a unique list of ingredients from the following food description.
-      Do not repeat ingredients. Return a comma-separated list.
+ Extract only the food ingredients from this text as a comma-separated list. Only list ingredient names, nothing else. Text:
+          ${caption.map((ele: { label: string; score: number }) => ele.label)}
+          `;
 
-      Description:
-      ${caption}
-      `;
-      const messages = [
-        { role: "system", content: "You are helpful assistant" },
-        { role: "user", content: ingredientPrompt },
-      ];
-
-      const ingredientOutput = await ingredientRef.current(messages, {
-        max_new_tokens: 80,
+      const ingredientOutput = await ingredientRef.current(ingredientPrompt, {
+        max_new_tokens: 200,
       });
 
       const ingredients = Array.isArray(ingredientOutput)
-        ? ingredientOutput[2]?.content
-        : ingredientOutput?.content;
+        ? ingredientOutput[0]?.generated_text
+        : ingredientOutput?.generated_text;
 
-      setResult(ingredients);
+      setResult(processIngredients(ingredients));
       console.log(ingredients);
     } catch (error) {
       console.error(error);

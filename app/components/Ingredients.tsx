@@ -9,43 +9,44 @@ import { useRef, useState } from "react";
 export const Ingredient = () => {
   const captionref = useRef<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [result, setResult] = useState<string>("");
-  const [preview, setPreview] = useState<string>("");
+  const [result, setResult] = useState<string | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+
+  const processIngredients = (text: string): string => {
+    const rawIngredients = text.split(",") ?? [];
+
+    const uniqueIngredients: string[] = [
+      ...new Set(rawIngredients.map((item) => item.trim()).filter(Boolean)),
+    ];
+
+    return uniqueIngredients.join(", ");
+  };
+
   const Handlecaptioning = async () => {
     setLoading(true);
     setResult("");
     try {
       if (!captionref.current) {
         captionref.current = await pipeline(
-          "text-generation",
-          "HuggingFaceTB/SmolLM2-135M-Instruct",
+          "text2text-generation",
+          "Xenova/flan-t5-base",
         );
       }
-
-      const prompt = `
-You are a helpful assistant that extracts ingredients from food descriptions. 
-Read the description below and return a list of unique ingredients. 
-Do not include any duplicates. 
-
-Return only the ingredients as a comma-separated list.
-
-Food description:
-${preview}
-`;
-      const messages = [
-        { role: "system", content: "You are helpful assistant" },
-        { role: "user", content: prompt },
-      ];
-      const output = await captionref.current(messages, {
-        max_new_tokens: 1000,
+      const prompt = `Extract only the food ingredients from this text as a comma-separated list. Only list ingredient names, nothing else. Text: ${preview} Ingredients:`;
+      const output = await captionref.current(`${prompt}`, {
+        max_new_tokens: 100,
       });
 
       const text = Array.isArray(output)
         ? output[0]?.generated_text
         : output.generated_text;
 
-      setResult(text);
-      console.log(text);
+      try {
+        setResult(processIngredients(text));
+        console.log(text);
+      } catch {
+        console.error("Failed to parse ingredients", text);
+      }
     } catch (error) {
       console.error(error);
     } finally {
@@ -63,8 +64,8 @@ ${preview}
           size="icon"
           variant={"outline"}
           onClick={() => {
-            setPreview("");
-            setResult("");
+            setPreview(null);
+            setResult(null);
           }}
         >
           <IoRefresh />
