@@ -1,3 +1,4 @@
+"use clients";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { BsFileEarmarkText } from "react-icons/bs";
@@ -5,6 +6,8 @@ import { IoRefresh } from "react-icons/io5";
 import { PiStarFourBold } from "react-icons/pi";
 import { pipeline } from "@huggingface/transformers";
 import { useRef, useState } from "react";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 
 export const Ingredient = () => {
   const captionref = useRef<any>(null);
@@ -53,6 +56,34 @@ export const Ingredient = () => {
       setLoading(false);
     }
   };
+  //   const { messages, sendMessage } = useChat({
+  //   transport: new DefaultChatTransport({
+  //     api: "/api/chat",
+  //   }),
+  // });
+  const handleSubmit = async (preview: string | null) => {
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/get-ingredients", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ preview }),
+      });
+
+      const data = await response.json();
+      console.log("Full response:", data);
+      if (data.ingredients) {
+        setResult(data.ingredients);
+      } else {
+        console.error("No ingredients in response");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <>
       <div className="flex justify-between">
@@ -84,7 +115,7 @@ export const Ingredient = () => {
         <div className="w-full flex justify-end">
           <Button
             onClick={() => {
-              Handlecaptioning();
+              handleSubmit(preview);
             }}
           >
             Generate

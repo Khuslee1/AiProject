@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Header } from "./components/Header";
 import { ImageAnalysis } from "./components/ImageAnalysis";
 import { Ingredient } from "./components/Ingredients";
-import { ImageCreator } from "./components/ImageCreator";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,8 +18,20 @@ import { IoChatbubbleOutline, IoCloseOutline } from "react-icons/io5";
 import { Input } from "@/components/ui/input";
 import { BsSend } from "react-icons/bs";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
+import { useState } from "react";
+import ImageCreator from "./components/ImageCreator";
 
 export default function Home() {
+  const { messages, sendMessage } = useChat({
+    transport: new DefaultChatTransport({
+      api: "/api/chat",
+    }),
+  });
+  console.log({ messages });
+
+  const [input, setInput] = useState<string>("");
   return (
     <div className="flex flex-col gap-5 items-center relative h-screen">
       <Header />
@@ -62,14 +74,50 @@ export default function Home() {
               </DialogClose>
             </DialogTitle>
           </DialogHeader>
-          <ScrollArea className="h-92 border border-[#E4E4E7]"></ScrollArea>
+          <ScrollArea className="h-92 border border-[#E4E4E7] overflow-scroll flex flex-col gap-3 px-4 py-3">
+            {messages.map((message, index) => (
+              <div key={index}>
+                {message.parts.map((part) => {
+                  if (part.type === "text") {
+                    return (
+                      <div
+                        className={`rounded-[10px] w-fit py-px px-2 text-sm flex ${message.role == "assistant" ? "text-black bg-[#F4F4F5CC] justify-self-end" : "text-white bg-black"}`}
+                        key={`${message.id}-text`}
+                      >
+                        {part.text}
+                      </div>
+                    );
+                  }
+                })}
+              </div>
+            ))}
+          </ScrollArea>
           <DialogFooter className="border border-[#E4E4E7] py-2 px-4 rounded-b-lg">
-            <Input />
-            <DialogClose asChild>
-              <Button size={"icon"} className="rounded-full">
-                <BsSend />
-              </Button>
-            </DialogClose>
+            <Input
+              value={input}
+              onChange={(event) => {
+                setInput(event.target.value);
+              }}
+              onKeyDown={async (event) => {
+                if (event.key === "Enter") {
+                  sendMessage({
+                    parts: [{ type: "text", text: input }],
+                  });
+                }
+              }}
+            />
+            <Button
+              size={"icon"}
+              className="rounded-full"
+              onClick={() => {
+                sendMessage({
+                  parts: [{ type: "text", text: input }],
+                });
+                setInput("");
+              }}
+            >
+              <BsSend />
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
