@@ -32,14 +32,6 @@ export default function ImageCreator() {
 
       if (data.error) {
         setError(data.error);
-        if (data.estimated_time) {
-          const waitTime = data.estimated_time;
-          setError(`Model loading... Retrying in ${waitTime} seconds`);
-
-          setTimeout(() => {
-            generateImage();
-          }, waitTime * 1000);
-        }
         return;
       }
 
@@ -81,7 +73,7 @@ export default function ImageCreator() {
           onChange={(e) => setDescription(e.target.value)}
           className="w-full p-3 border rounded-lg "
           rows={4}
-          placeholder="E.g., A delicious burger with melted cheese and crispy bacon"
+          placeholder="Хоолны тайлбар"
         />
 
         {error && (
@@ -125,7 +117,7 @@ export default function ImageCreator() {
                   unoptimized
                 />
               </div>
-              <Button
+              {/* <Button
                 onClick={() => {
                   const link = document.createElement("a");
                   link.href = generatedImage;
@@ -136,7 +128,7 @@ export default function ImageCreator() {
                 className="mt-3 w-full"
               >
                 Download Image
-              </Button>
+              </Button> */}
             </div>
           )}
         </div>

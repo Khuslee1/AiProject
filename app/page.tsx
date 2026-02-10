@@ -20,7 +20,7 @@ import { BsSend } from "react-icons/bs";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ImageCreator from "./components/ImageCreator";
 
 export default function Home() {
@@ -32,6 +32,14 @@ export default function Home() {
   console.log({ messages });
 
   const [input, setInput] = useState<string>("");
+
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [messages]);
   return (
     <div className="flex flex-col gap-5 items-center relative h-screen">
       <Header />
@@ -91,6 +99,7 @@ export default function Home() {
                 })}
               </div>
             ))}
+            <div ref={bottomRef} />
           </ScrollArea>
           <DialogFooter className="border border-[#E4E4E7] py-2 px-4 rounded-b-lg">
             <Input
@@ -103,6 +112,7 @@ export default function Home() {
                   sendMessage({
                     parts: [{ type: "text", text: input }],
                   });
+                  setInput("");
                 }
               }}
             />
