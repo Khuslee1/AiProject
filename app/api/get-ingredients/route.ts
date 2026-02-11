@@ -9,22 +9,25 @@ export async function POST(req: Request) {
       status: 400,
     });
   }
+  try {
+    const result = await generateText({
+      model: groq("llama-3.1-8b-instant"),
+      system:
+        "You are a helpful assistant that extracts ingredients from food descriptions. Return only a comma-separated list of unique ingredients.",
+      prompt: preview,
+    });
 
-  const result = await generateText({
-    model: groq("llama-3.1-8b-instant"),
-    system:
-      "You are a helpful assistant that extracts ingredients from food descriptions. Return only a comma-separated list of unique ingredients.",
-    prompt: preview,
-  });
+    console.log("Result:", result.text);
 
-  console.log("Result:", result.text);
-
-  return new Response(
-    JSON.stringify({
-      ingredients: result.text,
-    }),
-    {
-      headers: { "Content-Type": "application/json" },
-    },
-  );
+    return new Response(
+      JSON.stringify({
+        ingredients: result.text,
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+  } catch (err) {
+    console.log(err);
+  }
 }
