@@ -135,10 +135,10 @@ export const ImageAnalysis = () => {
             <h1 className="font-semibold text-xl">Here is the summary</h1>
           </div>
           <div
-            className={`text-sm ${result ? "text-black" : "text-[#71717A]"} p-2 ${preview && "border border-[#E4E4E7] rounded-md"}`}
+            className={`text-sm ${result ? "text-black" : "text-[#71717A]"} p-2 ${preview && "border border-[#E4E4E7] rounded-md"} whitespace-pre-line`}
           >
             {result && !loading
-              ? result
+              ? `Here are the ingredients:\n${result.split(",").join("\n")}`
               : loading
                 ? "Working..."
                 : "Upload a food photo, and AI will detect the ingredients."}

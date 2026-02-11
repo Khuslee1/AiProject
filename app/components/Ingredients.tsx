@@ -128,14 +128,11 @@ export const Ingredient = () => {
             <BsFileEarmarkText />
             <h1 className="font-semibold text-xl">Identified Ingredients</h1>
           </div>
-          {/* <div className="text-sm text-[#71717A]">
-            First, enter your text to recognize an ingredients.
-          </div> */}
           <div
-            className={`text-sm ${result ? "text-black" : "text-[#71717A]"} p-2 ${preview && "border border-[#E4E4E7] rounded-md"}`}
+            className={`text-sm ${result ? "text-black" : "text-[#71717A]"} p-2 ${preview && "border border-[#E4E4E7] rounded-md"} whitespace-pre-line`}
           >
             {result && !loading
-              ? result
+              ? `Here are the ingredients:\n${result.split(",").join("\n")}`
               : loading
                 ? "Working..."
                 : "First, enter your text to recognize an ingredients."}
