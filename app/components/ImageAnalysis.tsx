@@ -73,30 +73,6 @@ export const ImageAnalysis = () => {
       setLoading(false);
     }
   };
-
-  // Extract ingredients from image
-  // const extractIngredients = async () => {
-  //   if (!imageFile) return;
-  //   console.log("API Key:", process.env.HUGGINGFACE_API_KEY?.substring(0, 10));
-
-  //   setLoading(true);
-  //   try {
-  //     const formData = new FormData();
-  //     formData.append("image", imageFile);
-
-  //     const response = await fetch("/api/image-text", {
-  //       method: "POST",
-  //       body: formData,
-  //     });
-
-  //     const data = await response.json();
-  //     setResult(data.ingredients);
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
   return (
     <>
       <div className="flex justify-between">

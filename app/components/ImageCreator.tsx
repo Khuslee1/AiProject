@@ -24,18 +24,12 @@ export default function ImageCreator() {
     try {
       const response = await fetch("/api/text-image", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ description }),
       });
+      const blob = await response.blob();
+      console.log(URL.createObjectURL(blob));
 
-      const data = await response.json();
-
-      if (data.error) {
-        setError(data.error);
-        return;
-      }
-
-      setGeneratedImage(data.image);
+      setGeneratedImage(URL.createObjectURL(blob));
     } catch (error) {
       console.error("Error:", error);
       setError("Failed to generate image");
@@ -99,6 +93,11 @@ export default function ImageCreator() {
             <FileImage />
             <h1 className="font-semibold text-xl">Result</h1>
           </div>
+          {!loading && (
+            <div className="text-sm text-[#71717A]">
+              Upload a food photo, and AI will detect the ingredients.
+            </div>
+          )}
 
           {loading && (
             <div className="w-full h-96 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -117,7 +116,7 @@ export default function ImageCreator() {
                   unoptimized
                 />
               </div>
-              {/* <Button
+              <Button
                 onClick={() => {
                   const link = document.createElement("a");
                   link.href = generatedImage;
@@ -128,7 +127,7 @@ export default function ImageCreator() {
                 className="mt-3 w-full"
               >
                 Download Image
-              </Button> */}
+              </Button>
             </div>
           )}
         </div>

@@ -83,6 +83,13 @@ export default function Home() {
             </DialogTitle>
           </DialogHeader>
           <ScrollArea className="h-92 border border-[#E4E4E7] overflow-scroll flex flex-col gap-3 px-4 py-3">
+            <div>
+              <div
+                className={`flex rounded-[10px] w-fit py-px px-2 text-sm  text-black bg-[#F4F4F5CC] justify-self-end`}
+              >
+                Hello, how can I help you today?
+              </div>
+            </div>
             {messages.map((message, index) => (
               <div key={index}>
                 {message.parts.map((part) => {
